@@ -17,6 +17,10 @@ MouseArea::MouseArea(sf::Shape const& shape) : MouseArea() {
 	copyShape(shape);
 }
 
+MouseArea::MouseArea(sf::Sprite const& sprite) : MouseArea() {
+	copySprite(sprite);
+}
+
 void MouseArea::copyShape(sf::Shape const& shape) {
 	setPointCount(shape.getPointCount());
 	for (size_t i = 0; i < m_points.size(); i++) {
@@ -28,7 +32,30 @@ void MouseArea::copyShape(sf::Shape const& shape) {
 	setScale(shape.getScale());
 	
 	recalculateCoeffs();
-	m_inverseTransform = getTransform().getInverse();
+	m_inverseTransform = (m_extraTransform * getTransform()).getInverse();
+	m_previousTransform = getTransform();
+}
+
+void MouseArea::setExtraTransform(sf::Transform const& transform) {
+	m_extraTransform = transform;
+	m_inverseTransform = (m_extraTransform * getTransform()).getInverse();
+}
+
+void MouseArea::copySprite(sf::Sprite const& sprite) {
+	setPointCount(4);
+	int height = sprite.getTextureRect().height;
+	int width = sprite.getTextureRect().width;
+	m_points[0] = sf::Vector2f(0, 0);
+	m_points[1] = sf::Vector2f(width, 0);
+	m_points[2] = sf::Vector2f(width, height);
+	m_points[3] = sf::Vector2f(0, height);
+	setOrigin(sprite.getOrigin());
+	setPosition(sprite.getPosition());
+	setRotation(sprite.getRotation());
+	setScale(sprite.getScale());
+	
+	recalculateCoeffs();
+	m_inverseTransform = (m_extraTransform * getTransform()).getInverse();
 	m_previousTransform = getTransform();
 }
 
@@ -89,6 +116,7 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 			}
 			break;
 		}
+		default:break;
 		}		
 	}
 	else if (event.type == sf::Event::MouseButtonReleased && activatorButtons.find(event.mouseButton.button) != activatorButtons.end()) {
@@ -109,6 +137,7 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 			m_triggered = false;
 			break;
 		}
+		default:break;
 		}	
 	}
 	else {
@@ -121,6 +150,7 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 		case HOLD: {
 			break;
 		}
+		default:break;
 		}	
 	}
 }
@@ -137,7 +167,7 @@ void MouseArea::updateFromGeometryChange(sf::Window const& relativeTo) {
 	}
 	
 	if (getTransform() != m_previousTransform) { //Transformed geometry has changed
-		m_inverseTransform = getTransform().getInverse();
+		m_inverseTransform = (m_extraTransform * getTransform()).getInverse();
 		m_previousTransform = getTransform();
 		shouldUpdateMouseInside = true;
 	}
@@ -186,6 +216,7 @@ void MouseArea::updateMouseInside(sf::Vector2i const& mousePos) {
 			m_state = NONE;
 		break;
 	}
+	default:break;
 	}	
 }
 

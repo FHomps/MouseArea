@@ -19,8 +19,12 @@ public:
 	MouseArea();
 	MouseArea(size_t pointCount);
 	MouseArea(sf::Shape const& shape);
+	MouseArea(sf::Sprite const& sprite);
 	
 	void copyShape(sf::Shape const& shape);
+	void copySprite(sf::Sprite const& sprite);
+
+	void setExtraTransform(sf::Transform const& transform);
 	
 	void setPointCount(size_t count);
 	size_t getPointCount() const { return m_points.size(); }
@@ -42,6 +46,7 @@ private:
 	std::vector <float> m_coeffs;
 	bool m_shouldRecalculateCoeffs = false;
 		
+	sf::Transform m_extraTransform = sf::Transform::Identity;
 	sf::Transform m_previousTransform = sf::Transform::Identity;
 	sf::Transform m_inverseTransform = sf::Transform::Identity;
 	
