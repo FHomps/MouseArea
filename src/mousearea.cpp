@@ -101,6 +101,7 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 		updateMouseInside(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
 	}
 	else if (event.type == sf::Event::MouseButtonPressed && activatorButtons.find(event.mouseButton.button) != activatorButtons.end()) {
+		updateMouseInside(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 		switch (m_mode) {
 		case CLICK: {
 			if (m_mouseInside) {
@@ -120,6 +121,7 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 		}		
 	}
 	else if (event.type == sf::Event::MouseButtonReleased && activatorButtons.find(event.mouseButton.button) != activatorButtons.end()) {
+		updateMouseInside(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 		switch (m_mode) {
 		case CLICK: {
 			if  (m_mouseInside && m_triggered) {
@@ -155,10 +157,10 @@ void MouseArea::updateFromEvent(sf::Event const& event) {
 	}
 }
 
-void MouseArea::updateFromGeometryChange(sf::Window const& relativeTo) {
+void MouseArea::updateFromGeometryChange(sf::Window const& relativeTo, bool forceMouseUpdate) {
 	if (m_points.size() < 3)
 		return;
-	
+
 	bool shouldUpdateMouseInside = false;
 	
 	if (m_shouldRecalculateCoeffs) { //Intrinsic geometry has changed
@@ -171,8 +173,8 @@ void MouseArea::updateFromGeometryChange(sf::Window const& relativeTo) {
 		m_previousTransform = getTransform();
 		shouldUpdateMouseInside = true;
 	}
-	
-	if (shouldUpdateMouseInside)
+
+	if (shouldUpdateMouseInside || forceMouseUpdate)
 		updateMouseInside(sf::Mouse::getPosition(relativeTo));
 }
 
@@ -184,6 +186,7 @@ void MouseArea::setMode(Mode mode) {
 
 void MouseArea::updateMouseInside(sf::Vector2i const& mousePos) {
 	sf::Vector2f transformedPos = m_inverseTransform.transformPoint(static_cast<sf::Vector2f>(mousePos));
+
 	m_mouseInside = true;
 	for (size_t i = 0; i < m_coeffs.size(); i++) {
 		if (!sameSign(m_coeffs[i], getCoeff(m_points[i], m_points[i+1], transformedPos))) {
@@ -191,7 +194,7 @@ void MouseArea::updateMouseInside(sf::Vector2i const& mousePos) {
 			break;
 		}
 	}
-	
+
 	switch (m_mode) {
 	case CLICK: {
 		if (m_mouseInside) {
@@ -217,7 +220,7 @@ void MouseArea::updateMouseInside(sf::Vector2i const& mousePos) {
 		break;
 	}
 	default:break;
-	}	
+	}
 }
 
 void MouseArea::recalculateCoeffs() {

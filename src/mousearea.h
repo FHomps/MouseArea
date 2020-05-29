@@ -31,8 +31,11 @@ public:
 	void setPoint(size_t index, sf::Vector2f const& point);
 	sf::Vector2f getPoint(size_t index) const { return m_points[index]; }
 	
+	//Updates the area state due to an event having happened
 	void updateFromEvent(sf::Event const& event);
-	void updateFromGeometryChange(sf::Window const& relativeTo);
+	//Updates the area state due to other reasons. Changes to geometry or transform are detected automatically and handled appropriately.
+	//For other "unnoticeable" changes (e.g. toggling whether or not the area is being drawn), you can force the mouse detection algorithm's execution.
+	void updateFromGeometryChange(sf::Window const& relativeTo, bool forceMouseUpdate = false);
 	
 	State getState() const { return m_state; }
 	
